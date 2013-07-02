@@ -6,6 +6,7 @@ import (
 	"encoding/base64"
 	"errors"
 	"io"
+	"io/ioutil"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -35,8 +36,8 @@ func GenerateSignature(ak, sk, method, bucket, object string) string {
 }
 
 func doHttpRequest(method, url string, headers map[string]string, in io.Reader) (resp *http.Response, err error) {
-	req, reqerr := http.NewRequest(method, url, in)
-	if reqerr != nil {
+	req, rerr := http.NewRequest(method, url, in)
+	if rerr != nil {
 		return nil, errors.New("http.NewRequest Error!")
 	}
 	for k, v := range headers {
@@ -46,5 +47,19 @@ func doHttpRequest(method, url string, headers map[string]string, in io.Reader) 
 			req.Header.Add(k, v)
 		}
 	}
-	return http.DefaultClient.Do(req)
+	resp, err = http.DefaultClient.Do(req)
+	if err != nil {
+		return nil, errors.New("do HTTP Request Error!")
+	}
+	if resp.StatusCode != 200 {
+		var errmsg string
+		body, rerr := ioutil.ReadAll(resp.Body)
+		if rerr != nil {
+			errmsg = "Read HTTP Response Error!"
+		}
+		errmsg = string(body)
+		resp.Body.Close()
+		return nil, errors.New(errmsg)
+	}
+	return resp, nil
 }

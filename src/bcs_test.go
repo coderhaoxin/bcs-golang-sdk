@@ -7,8 +7,8 @@ import (
 )
 
 const (
-	AK = "XXXX"	//replace it with you ak
-	SK = "XXXX"	//replace it with you sk
+	AK = "XXXX" //replace it with you ak
+	SK = "XXXX" //replace it with you sk
 )
 
 func TestBCS(t *testing.T) {
